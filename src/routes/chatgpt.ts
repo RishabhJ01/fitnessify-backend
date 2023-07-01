@@ -1,15 +1,17 @@
 const router=require("express").Router();
 const axios = require('axios');
 
+
+const token=process.env.OPEN_SOURCE_API_TOKEN
 // API endpoint for creating a chat session
-app.post('/chat/session', async (req, res) => {
+router.post('/chat/session', async (req, res) => {
     try {
       const response = await axios.post('https://api.openai.com/v1/chat/completions', {
         model: 'gpt-3.5-turbo',
         messages: [{ role: 'system', content: 'You are a fitness and wellness assistant.' }],
       }, {
         headers: {
-            'Authorization': 'Bearer YOUR_OPENAI_API_KEY',
+            'Authorization': 'Bearer '+token,
           'Content-Type': 'application/json',
         },
       });
@@ -22,7 +24,7 @@ app.post('/chat/session', async (req, res) => {
   });
   
   // API endpoint for sending user messages
-  app.post('/chat/message', async (req, res) => {
+router.post('/chat/message', async (req, res) => {
     const { sessionId, message } = req.body;
   
     try {
@@ -30,7 +32,7 @@ app.post('/chat/session', async (req, res) => {
         messages: [{ role: 'system', content: message }],
       }, {
         headers: {
-          'Authorization': 'Bearer YOUR_OPENAI_API_KEY',
+          'Authorization':`Bearer ${token}`,
           'Content-Type': 'application/json',
         },
       });
@@ -43,13 +45,13 @@ app.post('/chat/session', async (req, res) => {
   });
   
   // API endpoint for retrieving chat history
-  app.get('/chat/history/:sessionId', async (req, res) => {
+router.get('/chat/history/:sessionId', async (req, res) => {
     const sessionId = req.params.sessionId;
   
     try {
       const response = await axios.get(`https://api.openai.com/v1/chat/completions/${sessionId}`, {
         headers: {
-          'Authorization': 'Bearer YOUR_OPENAI_API_KEY',
+          'Authorization': `Bearer ${token}`
         },
       });
   
@@ -61,7 +63,7 @@ app.post('/chat/session', async (req, res) => {
   });
   
   // API endpoint for generating suggested responses
-  app.post('/chat/suggestions', async (req, res) => {
+  router.post('/chat/suggestions', async (req, res) => {
     const { sessionId } = req.body;
   
     try {
@@ -69,7 +71,7 @@ app.post('/chat/session', async (req, res) => {
         messages: [{ role: 'system', content: 'Suggest' }],
       }, {
         headers: {
-            'Authorization': 'Bearer YOUR_OPENAI_API_KEY',
+            'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
       });
@@ -82,13 +84,13 @@ app.post('/chat/session', async (req, res) => {
     }
   });
   
-  
-  app.get("/response",(req,res)=>{
+  router.get("/response",(req,res)=>{
     // const {message} =req.body
     var message='hello how are you ?'
     var resp=generateChatMessage(message)
     res.status(200).json({resp})
   })
+
   async function generateChatMessage(prompt) {
     try {
       const response = await axios.post('https://api.openai.com/v1/chat/completions', {
@@ -97,7 +99,7 @@ app.post('/chat/session', async (req, res) => {
       }, {
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer YOUR_OPENAI_API_KEY',
+          'Authorization': `Bearer ${token}`,
         },
       });
   
@@ -107,3 +109,5 @@ app.post('/chat/session', async (req, res) => {
       throw error;
     }
   }
+
+  module.exports=router
